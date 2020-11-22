@@ -1,0 +1,62 @@
+.detailBox {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  .leftBox {
+    position: relative;
+    width: 360px;
+    height: 100%;
+    margin-top: 20px;
+    font-size: 12px;
+
+    .prefix {
+      color: #aaaaaa;
+      margin-left: 10px;
+    }
+  }
+
+  .rightBox {
+    position: relative;
+    width: calc(100% - 380px);
+    height: 100%;
+    margin-top: 20px;
+
+    .imgDisplay {
+      height: 100%;
+      width: 90%;
+      padding: 16px;
+    }
+
+    .items {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+.sameLine {
+  display: inline-block;
+  margin-right: 12px;
+  line-height: 40px;
+  height: 40px;
+  text-align: start;
+}
+
+.oneLine {
+  display: block;
+  line-height: 40px;
+  text-align: start;
+  height: 40px;
+}
+
+.stepBar {
+  width: 100%;
+  height: 80px;
+  margin: 0px 0 20px 0;
+}
