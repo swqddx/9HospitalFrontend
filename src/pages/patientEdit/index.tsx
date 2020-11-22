@@ -211,7 +211,6 @@ const PatientEdit: React.FC = ({ dispatch, patientDetails, patientIndex, imageUr
                     </Form>
                 </div>
             </div>
-
         </>
     )
 }

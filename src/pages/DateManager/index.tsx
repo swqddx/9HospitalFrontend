@@ -10,17 +10,30 @@ import listPlugin from '@fullcalendar/list';
 
 const { Option } = Select;
 const { useForm } = Form;
+interface EventIProps{
+    title: string,
+    startDate: string,
+
+}
+
 const DateManager = () => {
 
     const [modalVis, setmodalVis] = useState(false)
     const [selector, setSelector] = useState<any>()
-
+    const [events, setEvents] = useState<EventIProps[]>([]);
 
     useEffect(() => {
         request('http://202.120.37.220:23333/get_schedule/', {
             method: 'get'
         }).then((res) => {
+            let eventTemp = [];
             // console.log(res);
+            Object.keys(res).forEach((item,index)=>{
+                let temp = { id: index, title: res[item].Patient + " " + res[item].Type, start: moment(res[item].Date,'YYYY年MM月DD日').format("YYYY-MM-DD"), resourceId: 'a' }
+                eventTemp.push(temp);
+                // console.log(temp);
+            });
+            setEvents(eventTemp);
         });
     }, [])
 
@@ -79,6 +92,7 @@ const DateManager = () => {
                 weekends
                 locale='zh-cn'
                 select={handleDateSelect}
+                events={events}
                 eventContent={renderEventContent} // custom render function
                 eventClick={handleEventClick}
                 eventsSet={handleEvents} // called after events are initialized/added/changed/removed
