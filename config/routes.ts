@@ -33,14 +33,6 @@
       hideInMenu: true
   },
   {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './ListTableList',
-    hideInMenu: true
-
-  },
-  {
     path: '/',
     redirect: '/welcome',
   },

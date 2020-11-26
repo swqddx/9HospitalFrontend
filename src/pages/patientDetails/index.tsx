@@ -48,7 +48,7 @@ const { Step } = Steps;
 const PatientDetailsPage: React.FC = ({ dispatch, patientList }) => {
     // const [patientId, setPatientId] = useState(useLocation().query.id);
     async function requestData() {
-        const nameList = await requestPatientList({});
+        const nameList = await requestPatientList("/get_task/" , {});
         const Patients = Object.keys(nameList.NameList);
         Patients.unshift('');
         const ress = Patients.map((item) => {

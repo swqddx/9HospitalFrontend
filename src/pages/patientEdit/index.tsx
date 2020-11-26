@@ -9,7 +9,6 @@ import {
     Select,
     message
 } from 'antd';
-import { post } from 'axios';
 import {
     // UploadOutlined,
     // DownloadOutlined,
@@ -17,7 +16,6 @@ import {
     // CloseOutlined,
     PlusOutlined,
 } from '@ant-design/icons';
-import qs from 'qs';
 import { connect, request } from 'umi';
 import styles from './index.less';
 
@@ -46,19 +44,30 @@ const PatientEdit: React.FC = ({ dispatch, patientDetails, patientIndex, imageUr
 
     const [infoForm] = useForm();
     const saveInfo = (patientIndex) => {
-        console.log(infoForm?.getFieldsValue());
-        request(`http://202.120.37.220:23333/edit_task/?name=${patientDetails.name}`, {
-            method: 'post',
-            data: JSON.stringify(infoForm?.getFieldsValue()),
-            charset: 'utf8',
-            requestType: 'json',
-        }).then((res) => {
-            if (res.result === 'success') {
-                message.success('保存成功');
-            }
-        });
-
-        return false;
+        if (!patientDetails) {
+            request(`http://202.120.37.220:23333/add_task/`, {
+                method: 'post',
+                data: JSON.stringify(infoForm?.getFieldsValue()),
+                charset: 'utf8',
+                requestType: 'json',
+            }).then((res) => {
+                if (res.result === 'success') {
+                    message.success('保存成功');
+                }
+            });
+        } 
+        else {
+            request(`http://202.120.37.220:23333/edit_task/?name=${patientDetails.name}`, {
+                method: 'post',
+                data: JSON.stringify(infoForm?.getFieldsValue()),
+                charset: 'utf8',
+                requestType: 'json',
+            }).then((res) => {
+                if (res.result === 'success') {
+                    message.success('保存成功');
+                }
+            });
+        }
     }
 
     useEffect(() => {
@@ -70,8 +79,11 @@ const PatientEdit: React.FC = ({ dispatch, patientDetails, patientIndex, imageUr
             })
             keys_array.push({ name: "PatientNameEn", value: patientDetails?.name })
             infoForm.setFields(keys_array);
+        } else{
+            infoForm.resetFields();
         }
-    }, [patientDetails])
+    }, [patientIndex])
+
 
     const uploadButton = (
         <div id='' style={{ textAlign: 'center' }}>
@@ -94,8 +106,20 @@ const PatientEdit: React.FC = ({ dispatch, patientDetails, patientIndex, imageUr
                                             listType="picture-card"
                                             className="avatar-uploader"
                                             showUploadList={false}
-                                            action="http://202.120.37.220:23333/download/"
-                                        // beforeUpload={beforeUpload}
+                                            // action={(file)=>{
+                                            //     return new Promise((res, rej)=>{
+                                            //         request
+                                            //     })
+                                            // }}
+                                            beforeUpload={(file, list) => {
+                                                // console.log("file:  ", file);
+                                                const reader = new FileReader();
+                                                reader.onload = (res) => {
+                                                    infoForm.setFields([{ name: "ImageData", value: res.target?.result }]);
+                                                    console.log(infoForm.getFieldsValue())
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }}
                                         // onChange={handleChange}
                                         >
                                             {imageUrl ? <img width='100%' src={`http://202.120.37.220:23333/download/${patientDetails?.name}/pic.JPG`} alt="头像" /> : uploadButton}
@@ -111,6 +135,11 @@ const PatientEdit: React.FC = ({ dispatch, patientDetails, patientIndex, imageUr
                                         </Col>
                                         <div style={{ display: 'none', }}>
                                             <FormItem name="PatientNameEn">
+                                                <Input size='small' />
+                                            </FormItem>
+                                        </div>
+                                        <div style={{ display: 'none', }}>
+                                            <FormItem name="ImageData">
                                                 <Input size='small' />
                                             </FormItem>
                                         </div>
