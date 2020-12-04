@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-11-22 11:42:13
- * @LastEditTime: 2020-12-01 15:21:31
+ * @LastEditTime: 2020-12-03 22:07:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \9HospitalFrontend\src\services\patient.ts
@@ -36,34 +36,42 @@ export const login = function (username: string, password: string, params?: obje
     },
   );
 };
-// 请求单个病人数据信息
+
+// 请求日程实践列表
+export const requestDocSchedule = function (params?: object) {
+  return get(`${BASE_URL}/patients/schedule`, { ...params }).then((res) => {
+    return res;
+  });
+};
+
+// 请求单个病人的数据信息
 export const requestPatientDetails = function (id: number, params?: object) {
   return get(`${BASE_URL}/patients/patient_details?id=${id}`, { ...params }).then((res) => {
     return res as patientDetailsProps;
   });
 };
 
-// 请求单个病人ct列表信息
-export const requestPatient = function (params?: object) {
-  return get(`${BASE_URL}/patients/schedule`, { ...params }).then((res) => {
+// 请求单个病人阶段时间信息
+export const requestPatientSchedule = function (id: number, params?: object) {
+  return get(`${BASE_URL}/patients/patient_schedule?id=${id}`, { ...params }).then((res) => {
     return res;
   });
 };
 
-// 请求日程实践列表
-export const requestSchedule = function (params?: object) {
-  return get(`${BASE_URL}/patients/schedule`, { ...params }).then((res) => {
+// 请求病人CT列表信息
+export const requestCtList = function (id: number, params?: object) {
+  return get(`${BASE_URL}/patients/ct_list?id=${id}`, { ...params }).then((res) => {
+    console.log(res);
     return res;
   });
 };
+
 // 请求病人数据列表
 export const requestPatientList = function (params?: object) {
   return get(`${BASE_URL}/patients/patient_list/`, { ...params }).then((res: any) => {
     return res;
   });
 };
-
-// 请求某个病人的数据
 
 // 修改指定病人的数据
 export const editPatient = function (

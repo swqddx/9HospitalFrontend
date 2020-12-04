@@ -1,54 +1,133 @@
 import React, { useEffect, useState } from 'react';
+import { Breadcrumb, Row, Col, Steps, Card, Drawer, Upload, message, Input, Button } from 'antd';
 import {
-  Breadcrumb,
-  Row,
-  Col,
-  Steps,
-  Card,
-  // Drawer
-} from 'antd';
-import { BarsOutlined, DownloadOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { patientDetailsProps } from '@/interface/patient';
-import { requestPatientDetails, BASE_URL } from '@/services/patient';
+  BarsOutlined,
+  DownloadOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  InboxOutlined,
+} from '@ant-design/icons';
+import { patientDetailsProps, patientScheduleProps } from '@/interface/patient';
+import {
+  requestPatientDetails,
+  BASE_URL,
+  requestPatientSchedule,
+  requestCtList,
+} from '@/services/patient';
 import { Link, useLocation } from 'umi';
-
+import moment from 'moment';
+import CirclePlay from '../components/circlePlay';
 import styles from './index.less';
-// import CirclePlay from '../components/circlePlay';
-
-const itemslist = [
-  [
-    { name: '白石膏牙模', status: 'process' },
-    { name: '头颅正侧位片', status: 'process' },
-    { name: '全景片', status: 'process' },
-  ],
-  [
-    { name: '上下颌牙模', status: 'process' },
-    { name: '蜡片', status: 'process' },
-    { name: 'CT', status: 'process' },
-    { name: 'MRI', status: 'no' },
-    { name: 'X-ray', status: 'process' },
-    { name: '照片', status: 'process' },
-    { name: '3dMD', status: 'process' },
-    { name: '预约单', status: 'no' },
-  ],
-  [{ name: '方案审核', status: 'process' }],
-  [
-    { name: '调合', status: 'process' },
-    { name: '试合板', status: 'no' },
-  ],
-];
 
 const { Step } = Steps;
-
 const PatientDetailsPage: React.FC = () => {
   const id: number = useLocation().query?.id;
+
   const [patientDetails, setPatientDetails] = useState<patientDetailsProps>();
   const [currentStep, setCurrentStep] = useState(0);
-  // const [drawerVisiable, setDrawerVisiable] = useState(false);
+  const [drawerVisiable, setDrawerVisiable] = useState(false);
+  const [patientSchedule, setPatientSchedule] = useState([] as patientScheduleProps[]);
+  const [ctList, setCtList] = useState([]);
+
+  const [currentItem, setCurrentItem] = useState<any>();
+
+  const uploadProps = {
+    name: 'file',
+    multiple: true,
+    action: `${BASE_URL}/patients/?id=${id}`,
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  };
+
+  const defaultUpload = (
+    <>
+      <div>
+        <Upload.Dragger {...uploadProps}>
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">Click or drag file to this area to upload</p>
+          <p className="ant-upload-hint">
+            Support for a single or bulk upload. Strictly prohibit from uploading company data or
+            other band files
+          </p>
+        </Upload.Dragger>{' '}
+        <br />
+        <p>文件名: </p>
+        <Input placeholder="请输入文件名" />
+        <br />
+        <p style={{ marginTop: '10px' }}>备注: </p>
+        <Input.TextArea
+          autoSize={{
+            minRows: 4,
+            maxRows: 8,
+          }}
+          placeholder="请输入该文件的描述内容"
+        />
+        <br />
+        <Button type="primary" style={{ float: 'right', marginTop: '20px' }}>
+          上传
+        </Button>
+      </div>
+    </>
+  );
+
+  const displayElement = {
+    maxillofacial_panorama: '颌面部全景图',
+    maxillofacial_CT: (
+      <>
+        <CirclePlay dicmList={ctList} />
+      </>
+    ),
+    joint_MRI: '颞下关节MRI',
+    dental_model: '白石膏牙模',
+    clinical_examination: '临床检查',
+    CT_reconstruction: 'CT重建',
+    model_scanning: '牙模激光扫描',
+    threedimensional_design: '三维设计',
+    design_review: '设计方案确定',
+    guide_printing: '合金导板打印',
+    operation: '手术',
+    occlusion_check: '咬合关系检查',
+    faceshape_evaluation: '面形评估',
+    imaging_panorama: '影像学全景片',
+    positioning_film: '头颅定位片',
+    CT_examination: 'CT检查',
+  };
+
+  const uploadElement = {
+    maxillofacial_panorama: defaultUpload,
+    maxillofacial_CT: defaultUpload,
+    joint_MRI: defaultUpload,
+    dental_model: defaultUpload,
+    clinical_examination: defaultUpload,
+    CT_reconstruction: defaultUpload,
+    model_scanning: defaultUpload,
+    threedimensional_design: defaultUpload,
+    design_review: defaultUpload,
+    guide_printing: defaultUpload,
+    operation: defaultUpload,
+    occlusion_check: defaultUpload,
+    faceshape_evaluation: defaultUpload,
+    imaging_panorama: defaultUpload,
+    positioning_film: defaultUpload,
+    CT_examination: defaultUpload,
+  };
 
   useEffect(() => {
     async function requestData() {
       setPatientDetails(await requestPatientDetails(id));
+      setPatientSchedule(await requestPatientSchedule(id));
+      setCtList(await requestCtList(id));
     }
     requestData();
   }, []);
@@ -74,7 +153,7 @@ const PatientDetailsPage: React.FC = () => {
                 <img
                   width="90px"
                   height="120px"
-                  src={`${BASE_URL}/${patientDetails?.image}`}
+                  src={`${BASE_URL}${patientDetails?.image}`}
                   alt=""
                 />
               </Col>
@@ -175,55 +254,83 @@ const PatientDetailsPage: React.FC = () => {
               className={styles.stepBar}
               current={currentStep}
             >
-              <Step title="首次就诊" status="finish" />
-              <Step title="二次就诊" status="finish" />
-              <Step title="术前就诊" status="wait" disabled />
-              <Step title="手术" status="wait" disabled />
+              {patientSchedule.map((item) => {
+                return (
+                  <Step
+                    title={
+                      <>
+                        <p style={{ fontSize: '12px', textAlign: 'center' }}>{item.label}</p>
+                        <div style={{ fontSize: '12px', textAlign: 'center' }}>
+                          {item.status === 'completed'
+                            ? '已完成'
+                            : `请于${moment(item.time).format('MoDo HH:MM')}前完成`}
+                        </div>
+                      </>
+                    }
+                    status={item.status && item.status}
+                  />
+                );
+              })}
             </Steps>
             <div className={styles.items}>
-              {itemslist[currentStep].map((item, index) => {
+              {patientSchedule[currentStep]?.children.map((item, index) => {
                 return (
                   <Card
                     style={{ width: 200, margin: 16 }}
                     actions={[
-                      <>
-                        <BarsOutlined
-                          key="upload"
-                          // onClick={() => { setDrawerVisiable(true) }}
-                        />
-                        <span>详情</span>
-                      </>,
-                      <>
+                      <div
+                        onClick={() => {
+                          setCurrentItem(displayElement[item.name]);
+                          setDrawerVisiable(true);
+                        }}
+                      >
+                        <BarsOutlined key="upload" />
+                        <p>详情</p>
+                      </div>,
+                      <div
+                        onClick={() => {
+                          setCurrentItem(uploadElement[item.name]);
+                          setDrawerVisiable(true);
+                        }}
+                      >
                         <DownloadOutlined key="download" />
-                        <span>上传</span>
-                      </>,
+                        <p>上传</p>
+                      </div>,
                     ]}
                     key={index}
                   >
                     <div>
-                      {item.status === 'process' ? (
+                      {item.status === 'completed' ? (
                         <CheckOutlined style={{ fontSize: '36px', color: 'green' }} />
                       ) : (
                         <CloseOutlined style={{ fontSize: '36px', color: 'red' }} />
                       )}
                     </div>
-                    <p style={{ textAlign: 'center' }}>{item.name}</p>
+                    <p style={{ textAlign: 'center' }}>{item.label}</p>
+
+                    <div style={{ fontSize: '12px', color: '#999999', textAlign: 'center' }}>
+                      {item.status === 'completed'
+                        ? '已完成'
+                        : `请于${moment(item.time).format('YYYY-MM-DD HH:MM')}前完成`}
+                    </div>
                   </Card>
                 );
               })}
             </div>
           </div>
-          {/* <Drawer
+          <Drawer
             title={patientDetails?.name}
             placement="right"
             closable
-            onClose={() => { setDrawerVisiable(false) }}
+            onClose={() => {
+              setDrawerVisiable(false);
+            }}
             visible={drawerVisiable}
             mask={false}
             width={600}
           >
-            <CirclePlay imgList={patientDetails?.Ct?.ImgUrlList} dicmList={patientDetails?.Ct?.CtUrlList} />
-          </Drawer> */}
+            {currentItem && currentItem}
+          </Drawer>
         </div>
       </div>
     </>

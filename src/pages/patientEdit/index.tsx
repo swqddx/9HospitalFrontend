@@ -76,6 +76,7 @@ const PatientEdit: React.FC = () => {
         position: 'relative',
         border: 'dashed 1px #666666',
         marginLeft: '60px',
+        cursor: 'pointer',
       }}
     >
       <div style={{ transform: 'translateY(-50%)', top: '50%', position: 'relative' }}>
@@ -121,7 +122,7 @@ const PatientEdit: React.FC = () => {
                     <img
                       src={`${BASE_URL}/${patientDetails.image}`}
                       alt="avatar"
-                      style={{ width: '150px', marginLeft: '40px' }}
+                      style={{ width: '150px', marginLeft: '40px', cursor: 'pointer' }}
                     />
                   ) : (
                     uploadButton
