@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-11-22 11:42:13
- * @LastEditTime: 2020-12-03 22:07:09
+ * @LastEditTime: 2020-12-06 15:02:54
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \9HospitalFrontend\src\services\patient.ts
@@ -86,10 +86,21 @@ export const editPatient = function (
   );
 };
 
+// 修改某项完成状态与时间
+export const changeItem = function (id: number, itemName: string) {
+  return get(`${BASE_URL}/patients/edit_schedule/?id=${id}&key=${itemName}`).then((res: any) => {
+    return res;
+  });
+};
+
 // 添加病人基本信息
 export const addPatient = function (patientInfo: patientDetailsProps, params?: object) {
+  // get((`${BASE_URL}/patients/add_patient/`))
   return post(`${BASE_URL}/patients/add_patient/`, patientInfo, params).then((res: any) => {
-    return res;
+    console.log(res);
+    return get(`${BASE_URL}/patients/add_schedule/?id=${res.data.insertId}`).then((res1: any) => {
+      return res1;
+    });
   });
 };
 

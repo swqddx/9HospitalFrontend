@@ -1,8 +1,7 @@
-import styles from './circlePlay.less';
 import CornerStoneDisplay from '../patientDetails/components/CornerStoneDisplay';
 import React, { useState } from 'react';
 import { BASE_URL } from '@/services/patient';
-
+import styles from './circlePlay.less';
 // interface CirclePlayIProps {
 //     // imgList: string[],
 //     dicmList: string[],

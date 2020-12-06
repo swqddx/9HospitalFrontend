@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Row, Col, Steps, Card, Drawer, Upload, message, Input, Button } from 'antd';
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Steps,
+  Card,
+  Drawer,
+  Upload,
+  message,
+  Input,
+  Button,
+  Modal,
+} from 'antd';
 import {
   BarsOutlined,
   DownloadOutlined,
@@ -13,11 +25,13 @@ import {
   BASE_URL,
   requestPatientSchedule,
   requestCtList,
+  changeItem,
 } from '@/services/patient';
 import { Link, useLocation } from 'umi';
 import moment from 'moment';
 import CirclePlay from '../components/circlePlay';
 import styles from './index.less';
+import Model3D from './Model3D';
 
 const { Step } = Steps;
 const PatientDetailsPage: React.FC = () => {
@@ -93,7 +107,11 @@ const PatientDetailsPage: React.FC = () => {
     clinical_examination: '临床检查',
     CT_reconstruction: 'CT重建',
     model_scanning: '牙模激光扫描',
-    threedimensional_design: '三维设计',
+    threedimensional_design: (
+      <>
+        <Model3D />
+      </>
+    ),
     design_review: '设计方案确定',
     guide_printing: '合金导板打印',
     operation: '手术',
@@ -123,12 +141,13 @@ const PatientDetailsPage: React.FC = () => {
     CT_examination: defaultUpload,
   };
 
+  async function requestData() {
+    setPatientDetails(await requestPatientDetails(id));
+    setPatientSchedule(await requestPatientSchedule(id));
+    setCtList(await requestCtList(id));
+  }
+
   useEffect(() => {
-    async function requestData() {
-      setPatientDetails(await requestPatientDetails(id));
-      setPatientSchedule(await requestPatientSchedule(id));
-      setCtList(await requestCtList(id));
-    }
     requestData();
   }, []);
 
@@ -303,7 +322,21 @@ const PatientDetailsPage: React.FC = () => {
                       {item.status === 'completed' ? (
                         <CheckOutlined style={{ fontSize: '36px', color: 'green' }} />
                       ) : (
-                        <CloseOutlined style={{ fontSize: '36px', color: 'red' }} />
+                        <CloseOutlined
+                          onClick={() => {
+                            Modal.confirm({
+                              title: '是否确认该项已完成',
+                              onOk: async () => {
+                                const res = await changeItem(id, item.name);
+                                if (res) {
+                                  message.success('修改成功');
+                                  requestData();
+                                }
+                              },
+                            });
+                          }}
+                          style={{ fontSize: '36px', color: 'red' }}
+                        />
                       )}
                     </div>
                     <p style={{ textAlign: 'center' }}>{item.label}</p>
